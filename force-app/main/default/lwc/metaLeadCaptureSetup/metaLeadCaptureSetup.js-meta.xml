@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Meta Lead Capture Setup</masterLabel>
+    <description>Admin console for the Meta Lead Ads integration: integration settings, connected Pages, lead field mapping, stage mapping, notification recipients, and sync failure reprocessing. All org-specific data, never deployed metadata.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__Tab</target>
+    </targets>
+</LightningComponentBundle>

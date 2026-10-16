@@ -1,0 +1,65 @@
+<apex:page controller="MetaConnectFacebookController" showHeader="false" sidebar="false"
+    standardStylesheets="false" applyHtmlTag="false" docType="html-5.0" cache="false">
+<html>
+<head>
+<meta charset="utf-8"/>
+<style>
+  html, body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; text-align: center; }
+  #fb-login-btn { background: #1877f2; color: #fff; border: none; border-radius: 6px; padding: 12px 22px; font-size: 15px; cursor: pointer; }
+  #fb-login-btn:disabled { opacity: .55; cursor: default; }
+  #status { margin-top: 14px; color: #444; font-size: 13px; min-height: 16px; }
+</style>
+</head>
+<body>
+  <button id="fb-login-btn" onclick="startLogin()">Continue with Facebook</button>
+  <div id="status"></div>
+
+<script>
+  var EXPECTED_ORIGIN = {!JSENCODE(originParam)};
+  var APP_ID = {!JSENCODE(appId)};
+  var CONFIG_ID = {!JSENCODE(configId)};
+
+  function setStatus(msg) { document.getElementById('status').innerText = msg; }
+
+  if (!APP_ID || !CONFIG_ID) {
+    setStatus('Set Meta App Id and Meta Login Config Id on the Integration Settings tab first, then reopen this.');
+    document.getElementById('fb-login-btn').disabled = true;
+  }
+
+  window.fbAsyncInit = function () {
+    FB.init({ appId: APP_ID, xfbml: false, version: 'v21.0' });
+  };
+
+  (function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) { return; }
+    js = d.createElement(s); js.id = id;
+    js.src = 'https://connect.facebook.net/en_US/sdk.js';
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  function startLogin() {
+    if (typeof FB === 'undefined') {
+      setStatus('Facebook SDK still loading — try again in a moment.');
+      return;
+    }
+    setStatus('Opening Facebook login...');
+    FB.login(function (response) {
+      if (response && response.authResponse && response.authResponse.code) {
+        setStatus('Connected — finishing setup...');
+        if (window.parent && EXPECTED_ORIGIN) {
+          window.parent.postMessage({
+            type: 'META_OAUTH_CODE',
+            code: response.authResponse.code,
+            redirectUri: window.location.href.split('#')[0]
+          }, EXPECTED_ORIGIN);
+        }
+      } else {
+        setStatus('Login was cancelled or did not complete.');
+      }
+    }, { config_id: CONFIG_ID, response_type: 'code', override_default_response_type: true });
+  }
+</script>
+</body>
+</html>
+</apex:page>

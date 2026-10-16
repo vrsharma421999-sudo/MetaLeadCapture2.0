@@ -1,0 +1,341 @@
+<template>
+    <lightning-card title="Meta Lead Capture Setup" icon-name="standard:settings">
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+        </template>
+
+        <lightning-tabset variant="scoped" class="slds-p-horizontal_medium">
+
+            <!-- ================= Integration Settings ================= -->
+            <lightning-tab label="Integration Settings">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    App-level secrets and config for this org. Saved as data on this org's own
+                    Meta_Integration_Setting__c record — never overwritten by deploying this
+                    package to another org.
+                </p>
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Verify Token" value={integrationSetting.Verify_Token__c}
+                            data-field="Verify_Token__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="App Secret" type="password" value={integrationSetting.App_Secret__c}
+                            data-field="App_Secret__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Dataset ID" value={integrationSetting.Dataset_ID__c}
+                            data-field="Dataset_ID__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Conversions Access Token" type="password" value={integrationSetting.Conversions_Access_Token__c}
+                            data-field="Conversions_Access_Token__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Additional Failure Notification Email" value={integrationSetting.Failure_Notification_Email__c}
+                            placeholder="ops@example.com, other@example.com"
+                            data-field="Failure_Notification_Email__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Meta App Id" value={integrationSetting.Meta_App_Id__c}
+                            data-field="Meta_App_Id__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Meta Login Config Id" value={integrationSetting.Meta_App_Login_Config_Id__c}
+                            data-field="Meta_App_Login_Config_Id__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Lead Event Source" value={integrationSetting.Lead_Event_Source__c}
+                            data-field="Lead_Event_Source__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Graph API Version" value={integrationSetting.Graph_API_Version__c}
+                            data-field="Graph_API_Version__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-p-vertical_x-small">
+                        <lightning-input label="Max Conversion Sync Attempts" type="number" value={integrationSetting.Max_Conversion_Sync_Attempts__c}
+                            data-field="Max_Conversion_Sync_Attempts__c" onchange={handleIntegrationFieldChange}></lightning-input>
+                    </div>
+                </div>
+                <div class="slds-m-top_small">
+                    <lightning-button variant="brand" label="Save Settings" onclick={handleSaveIntegrationSetting}></lightning-button>
+                </div>
+
+                <div class="slds-box slds-m-top_large">
+                    <h3 class="slds-text-heading_small slds-m-bottom_x-small">Connect to Meta</h3>
+                    <p class="slds-text-body_small slds-m-bottom_small">
+                        One-time embedded Facebook login. Requires Meta App Id, Meta Login Config Id, and App Secret
+                        above to be saved first. On success this auto-discovers your Pages and their forms — same
+                        as clicking Sync Pages from Meta / Discover Forms &amp; Questions, just automatic. This is
+                        fully separate from the Named Credential/System User token the live webhook pipeline uses,
+                        so connecting (or reconnecting) here can never break lead capture.
+                    </p>
+                    <template if:true={metaConnectedUntilLabel}>
+                        <p class="slds-text-body_small slds-text-color_success slds-m-bottom_small">
+                            Connected — token valid until {metaConnectedUntilLabel}.
+                        </p>
+                    </template>
+                    <iframe src={metaConnectIframeUrl} title="Connect to Meta" width="260" height="70" frameborder="0"></iframe>
+                    <template if:true={isConnectingToMeta}>
+                        <lightning-spinner alternative-text="Connecting" size="small"></lightning-spinner>
+                    </template>
+                </div>
+            </lightning-tab>
+
+            <!-- ================= Pages ================= -->
+            <lightning-tab label="Pages">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    One row per connected Facebook Page. Inactive/unknown Pages are dead-lettered, not dropped.
+                </p>
+                <div class="slds-m-bottom_small">
+                    <lightning-button variant="brand" label="Sync Pages from Meta" icon-name="utility:refresh"
+                        onclick={handleSyncPages} disabled={isSyncingPages}></lightning-button>
+                    <span class="slds-text-body_small slds-m-left_small">
+                        Discovers every Page the connected Meta System User has access to, auto-subscribes new ones to the leadgen webhook, and adds a row for each.
+                    </span>
+                </div>
+                <div class="slds-grid slds-wrap slds-gutters slds-align-bottom">
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-input label="Page Id" value={newPage.pageId} data-field="pageId" onchange={handleNewPageChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-input label="Page Name" value={newPage.pageName} data-field="pageName" onchange={handleNewPageChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-input type="checkbox" label="Active" checked={newPage.active} data-field="active" onchange={handleNewPageChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-button label="Add Page" onclick={handleAddPage}></lightning-button>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-datatable key-field="Id" data={pageConfigs} columns={pageColumns}
+                        draft-values={pageDraftValues} onsave={handlePageSave} onrowaction={handlePageRowAction}>
+                    </lightning-datatable>
+                </div>
+            </lightning-tab>
+
+            <!-- ================= Field Mapping ================= -->
+            <lightning-tab label="Field Mapping">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    Mapping is per form — each Meta lead form has its own set of question keys.
+                </p>
+                <lightning-button variant="brand" label="New Lead Capture Mapping" icon-name="utility:add_form"
+                    onclick={handleOpenMappingModal}></lightning-button>
+
+                <div class="slds-m-top_medium">
+                    <template if:true={hasConfiguredForms}>
+                        <template for:each={configuredFormSummaries} for:item="summary">
+                            <div key={summary.formId}
+                                class="slds-box slds-box_x-small slds-m-bottom_x-small slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                <div>
+                                    <div class="slds-text-heading_small">{summary.formName}</div>
+                                    <div class="slds-text-body_small slds-text-color_weak">
+                                        {summary.active} of {summary.total} question(s) mapped and active · Form Id: {summary.formId}
+                                    </div>
+                                </div>
+                                <lightning-button label="Edit Mapping" icon-name="utility:edit"
+                                    data-form-id={summary.formId} data-form-name={summary.formName}
+                                    onclick={handleEditFormMapping}></lightning-button>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasConfiguredForms}>
+                        <div class="slds-text-color_weak slds-p-vertical_small">
+                            No form-specific mappings yet — click "New Lead Capture Mapping" above to create one.
+                        </div>
+                    </template>
+                </div>
+
+                <details class="slds-m-top_large">
+                    <summary class="slds-text-heading_small">Advanced: Global Fallback Mapping</summary>
+                    <p class="slds-text-body_small slds-m-vertical_small">
+                        Applies only when the form that sent a lead has no mapping of its own for a given key.
+                        Most orgs won't need this.
+                    </p>
+                    <div class="slds-grid slds-wrap slds-gutters slds-align-bottom">
+                        <div class="slds-col slds-size_1-of-3">
+                            <lightning-input label="Meta Field Key" placeholder="e.g. phone_number" value={newFieldMapping.metaFieldKey}
+                                data-field="metaFieldKey" onchange={handleNewFieldMappingChange}></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3">
+                            <lightning-combobox label="Salesforce Field" value={newFieldMapping.sfField} options={leadFieldOptions}
+                                data-field="sfField" onchange={handleNewFieldMappingChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-3">
+                            <lightning-button label="Add Global Mapping" onclick={handleAddFieldMapping}></lightning-button>
+                        </div>
+                    </div>
+                    <div class="slds-m-top_medium">
+                        <lightning-datatable key-field="Id" data={globalFieldMappings} columns={fieldColumns}
+                            draft-values={fieldDraftValues} onsave={handleFieldMappingSave} onrowaction={handleFieldMappingRowAction}>
+                        </lightning-datatable>
+                    </div>
+                </details>
+
+                <!-- ===== Lead Capture Mapping picker modal ===== -->
+                <template if:true={showMappingModal}>
+                    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large" aria-modal="true">
+                        <div class="slds-modal__container">
+                            <header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                                    title="Close" onclick={handleCloseMappingModal}>
+                                    <lightning-icon icon-name="utility:close" size="small" variant="inverse"></lightning-icon>
+                                    <span class="slds-assistive-text">Close</span>
+                                </button>
+                                <h2 class="slds-text-heading_medium">Lead Capture Mapping</h2>
+                            </header>
+                            <div class="slds-modal__content slds-p-around_medium">
+                                <template if:false={selectedFormId}>
+                                    <p class="slds-text-body_small slds-m-bottom_small">
+                                        Select the form you want to map. This list comes live from Meta — only forms on an
+                                        active Page (Pages tab) show up here.
+                                    </p>
+                                    <template if:true={isLoadingForms}>
+                                        <lightning-spinner alternative-text="Loading forms" size="small"></lightning-spinner>
+                                    </template>
+                                    <template if:false={isLoadingForms}>
+                                        <template if:true={hasNoAvailableForms}>
+                                            <div class="slds-text-color_weak">
+                                                No forms found — check that a Page is synced and active on the Pages tab.
+                                            </div>
+                                        </template>
+                                        <template for:each={availableForms} for:item="form">
+                                            <div key={form.formId}
+                                                class="slds-box slds-box_x-small slds-m-bottom_x-small slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                                <div>
+                                                    <div class="slds-text-heading_small">{form.formName}</div>
+                                                    <div class="slds-text-body_small slds-text-color_weak">
+                                                        Page: {form.pageName} · Form Id: {form.formId}
+                                                    </div>
+                                                </div>
+                                                <lightning-button label="Select" data-form-id={form.formId} onclick={handleSelectForm}></lightning-button>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </template>
+
+                                <template if:true={selectedFormId}>
+                                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
+                                        <h3 class="slds-text-heading_small">{selectedFormLabel}</h3>
+                                        <lightning-button label="Change Form" icon-name="utility:back" onclick={handleBackToFormList}></lightning-button>
+                                    </div>
+                                    <template if:true={isLoadingQuestions}>
+                                        <lightning-spinner alternative-text="Loading questions" size="small"></lightning-spinner>
+                                    </template>
+                                    <template if:false={isLoadingQuestions}>
+                                        <template if:true={hasNoQuestions}>
+                                            <div class="slds-text-color_weak">Meta returned no questions for this form.</div>
+                                        </template>
+                                        <template if:false={hasNoQuestions}>
+                                            <div class="slds-grid slds-text-title_bold slds-p-bottom_x-small slds-border_bottom">
+                                                <div class="slds-col slds-size_1-of-2">Meta Question</div>
+                                                <div class="slds-col slds-size_1-of-2">Lead Field</div>
+                                            </div>
+                                            <template for:each={mappingRows} for:item="row">
+                                                <div key={row.key}
+                                                    class="slds-grid slds-grid_vertical-align-center slds-p-vertical_x-small slds-border_bottom">
+                                                    <div class="slds-col slds-size_1-of-2">
+                                                        <div class="slds-text-body_regular">{row.label}</div>
+                                                        <div class="slds-text-body_small slds-text-color_weak">{row.key}</div>
+                                                    </div>
+                                                    <div class="slds-col slds-size_1-of-2">
+                                                        <lightning-combobox variant="label-hidden" placeholder="Not mapped"
+                                                            value={row.sfField} options={leadFieldOptions}
+                                                            data-key={row.key} onchange={handleMappingRowFieldChange}>
+                                                        </lightning-combobox>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </template>
+                                    </template>
+                                </template>
+                            </div>
+                            <footer class="slds-modal__footer">
+                                <lightning-button label="Cancel" onclick={handleCloseMappingModal}></lightning-button>
+                                <lightning-button variant="brand" label="Save Mapping" class="slds-m-left_x-small"
+                                    disabled={saveMappingDisabled} onclick={handleSaveMapping}></lightning-button>
+                            </footer>
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+            </lightning-tab>
+
+            <!-- ================= Stage Mapping ================= -->
+            <lightning-tab label="Stage Mapping">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    Lead.Status → Meta event_name, reported back to Meta's Conversions API when a Meta-sourced Lead's Status changes.
+                </p>
+                <div class="slds-grid slds-wrap slds-gutters slds-align-bottom">
+                    <div class="slds-col slds-size_1-of-3">
+                        <lightning-combobox label="Lead Status" value={newStageMapping.status} options={leadStatusOptions}
+                            data-field="status" onchange={handleNewStageMappingChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3">
+                        <lightning-input label="Meta Event Name" placeholder="e.g. qualified_lead" value={newStageMapping.eventName}
+                            data-field="eventName" onchange={handleNewStageMappingChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-3">
+                        <lightning-button label="Add Mapping" onclick={handleAddStageMapping}></lightning-button>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-datatable key-field="Id" data={stageMappings} columns={stageColumns}
+                        draft-values={stageDraftValues} onsave={handleStageMappingSave} onrowaction={handleStageMappingRowAction}>
+                    </lightning-datatable>
+                </div>
+            </lightning-tab>
+
+            <!-- ================= Notifications ================= -->
+            <lightning-tab label="Notifications">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    Who gets alerted when a Meta lead fails to sync, and how — Bell (in-app), Email, or Both, per user.
+                </p>
+                <div class="slds-grid slds-wrap slds-gutters slds-align-bottom">
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-input label="Search user" placeholder="name or email" value={notifSearchTerm}
+                            onchange={handleNotifSearchTermChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-button label="Search" onclick={handleSearchUsers}></lightning-button>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-combobox label="User" placeholder="Select from search results" value={newNotif.userId}
+                            options={notifSearchResults} onchange={handleNewNotifUserChange}></lightning-combobox>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-combobox label="Channel" value={newNotif.channel} options={channelOptions}
+                            onchange={handleNewNotifChannelChange}></lightning-combobox>
+                    </div>
+                </div>
+                <div class="slds-grid slds-wrap slds-gutters slds-align-bottom slds-m-top_x-small">
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-input type="checkbox" label="Active" checked={newNotif.active} onchange={handleNewNotifActiveChange}></lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-4">
+                        <lightning-button label="Add Recipient" onclick={handleAddNotifRecipient}></lightning-button>
+                    </div>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-datatable key-field="id" data={notifRecipients} columns={notifColumns}
+                        draft-values={notifDraftValues} onsave={handleNotifSave} onrowaction={handleNotifRowAction}>
+                    </lightning-datatable>
+                </div>
+            </lightning-tab>
+
+            <!-- ================= Sync Failures ================= -->
+            <lightning-tab label="Sync Failures">
+                <p class="slds-text-body_small slds-m-bottom_small">
+                    Meta leads that couldn't be saved (dead-lettered), excluding already-Resolved rows. Select rows and reprocess once the underlying issue is fixed.
+                </p>
+                <div class="slds-m-bottom_small">
+                    <lightning-button variant="brand" label="Reprocess Selected" onclick={handleReprocessSelected} disabled={reprocessDisabled}></lightning-button>
+                </div>
+                <lightning-datatable key-field="Id" data={syncFailures} columns={syncColumns}
+                    onrowselection={handleSyncFailureSelection}>
+                </lightning-datatable>
+            </lightning-tab>
+
+        </lightning-tabset>
+    </lightning-card>
+</template>
