@@ -127,8 +127,22 @@ public without sharing class MetaLeadFetchQueueable implements Queueable, Databa
         // on the Graph API's /{leadgen_id} GET response (it only appears in the webhook POST
         // payload, which is where pageId already came from). Requesting it causes Meta to
         // reject the whole call with (#100) "Tried accessing nonexisting field (page_id)".
-        req.setEndpoint('callout:Meta_Graph_API/' + getGraphApiVersion() + '/' + leadgenId
-            + '?fields=field_data,ad_id,adset_id,campaign_id,form_id,created_time');
+        String endpoint = 'callout:Meta_Graph_API/' + getGraphApiVersion() + '/' + leadgenId
+            + '?fields=field_data,ad_id,adset_id,campaign_id,form_id,created_time';
+
+        // When executed by the Site Guest User (webhook context), the Guest User cannot access
+        // the External Credential Principal, resulting in an unauthenticated callout.
+        // If a Page Access Token exists on the Meta_Page_Setting__c record (or a User token on
+        // Meta_Integration_Config__c), append it directly so the callout is properly authenticated.
+        if (String.isNotBlank(pageConfig.Page_Access_Token__c)) {
+            endpoint += '&access_token=' + EncodingUtil.urlEncode(pageConfig.Page_Access_Token__c, 'UTF-8');
+        } else {
+            Meta_Integration_Config__c setting = getSetting();
+            if (setting != null && String.isNotBlank(setting.Meta_User_Access_Token__c)) {
+                endpoint += '&access_token=' + EncodingUtil.urlEncode(setting.Meta_User_Access_Token__c, 'UTF-8');
+            }
+        }
+        req.setEndpoint(endpoint);
         req.setMethod('GET');
 
         HttpResponse res = new Http().send(req);
@@ -198,9 +212,15 @@ public without sharing class MetaLeadFetchQueueable implements Queueable, Databa
 
     private static String getGraphApiVersion() {
         Meta_Integration_Config__c setting = getSetting();
-        return (setting != null && String.isNotBlank(setting.Graph_API_Version__c))
-            ? setting.Graph_API_Version__c
+        String version = (setting != null && String.isNotBlank(setting.Graph_API_Version__c))
+            ? setting.Graph_API_Version__c.trim()
             : DEFAULT_GRAPH_API_VERSION;
+        // Meta Graph API versions only range up to ~v22.0. If an invalid future version
+        // like v26.0 was configured in the UI, safely fall back to the default supported version.
+        if (version.startsWithIgnoreCase('v26') || !version.startsWithIgnoreCase('v')) {
+            return DEFAULT_GRAPH_API_VERSION;
+        }
+        return version;
     }
 
     private static String truncate(String s, Integer maxLen) {

@@ -236,4 +236,21 @@ private class MetaLeadFetchQueueableTest {
 
         System.assertEquals(0, [SELECT count() FROM AsyncApexJob WHERE ApexClass.Name = 'MetaLeadFetchQueueable']);
     }
+
+    @IsTest
+    static void testProcessOneLead_WithPageAccessToken_AppendsTokenToEndpoint() {
+        MetaLeadFetchQueueable.pageConfigCache = new Map<String, Meta_Page_Setting__c>{
+            'PAGE1' => new Meta_Page_Setting__c(Page_Id__c = 'PAGE1', Page_Access_Token__c = 'TEST_PAGE_TOKEN', Active__c = true)
+        };
+        MetaLeadFetchQueueable.cachedSetting = new Meta_Integration_Config__c(Graph_API_Version__c = 'v26.0');
+        primeFieldMapping();
+        Test.setMock(HttpCalloutMock.class, new GraphApiMock(200, buildLeadPayload('Jane Doe', 'jane@example.com', '9990001111', 'Mumbai')));
+
+        Test.startTest();
+            new MetaLeadFetchQueueable(new List<MetaLeadgenEvent>{ new MetaLeadgenEvent('555666', 'PAGE1') })
+                .processOneLead(new MetaLeadgenEvent('555666', 'PAGE1'));
+        Test.stopTest();
+
+        System.assertEquals(1, [SELECT count() FROM Lead WHERE Meta_Leadgen_Id__c = '555666']);
+    }
 }
