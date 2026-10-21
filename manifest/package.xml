@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <!-- Apex Classes -->
+    <!-- Core Meta Lead Capture Apex Classes -->
     <types>
-        <members>ChangePasswordController</members>
-        <members>ChangePasswordControllerTest</members>
         <members>CreateErrorLog</members>
         <members>CreateErrorLogTest</members>
-        <members>ForgotPasswordController</members>
-        <members>ForgotPasswordControllerTest</members>
         <members>LeadConversionSyncHandler</members>
         <members>LeadConversionSyncHandlerTest</members>
         <members>MetaConnectFacebookController</members>
@@ -38,12 +34,6 @@
         <members>MetaPageSyncScheduler</members>
         <members>MetaPageSyncService</members>
         <members>MetaPageSyncServiceTest</members>
-        <members>MyProfilePageController</members>
-        <members>MyProfilePageControllerTest</members>
-        <members>SiteLoginController</members>
-        <members>SiteLoginControllerTest</members>
-        <members>SiteRegisterController</members>
-        <members>SiteRegisterControllerTest</members>
         <name>ApexClass</name>
     </types>
 
@@ -81,7 +71,7 @@
         <name>CustomObject</name>
     </types>
 
-    <!-- Custom Fields on Standard Objects -->
+    <!-- Custom Fields on Standard Lead Object -->
     <types>
         <members>Lead.Meta_Ad_Id__c</members>
         <members>Lead.Meta_Ad_Set_Id__c</members>
@@ -101,7 +91,7 @@
         <name>CustomTab</name>
     </types>
 
-    <!-- FlexiPages (Lightning Pages) -->
+    <!-- Lightning FlexiPages -->
     <types>
         <members>Meta_Lead_Capture_Setup</members>
         <name>FlexiPage</name>
