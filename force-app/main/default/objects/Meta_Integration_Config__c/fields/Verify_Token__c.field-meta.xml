@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Verify_Token__c</fullName>
+    <description>Arbitrary string you choose and also enter in Meta&apos;s webhook subscription setup (hub.verify_token). Used only for the one-time GET verification handshake.</description>
+    <externalId>false</externalId>
+    <label>Verify Token</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

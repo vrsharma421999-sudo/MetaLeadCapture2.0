@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>Meta_Lead_Sync_Failure_Alert</customNotifTypeName>
+    <description>Sent by MetaLeadSyncFailureNotifier to admins with the Meta_Lead_Integration_Admin permission set whenever a Meta lead could not be saved.</description>
+    <desktop>true</desktop>
+    <masterLabel>Meta Lead Sync Failure</masterLabel>
+    <mobile>true</mobile>
+    <slack>false</slack>
+</CustomNotificationType>

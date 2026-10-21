@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Dataset_ID__c</fullName>
+    <description>Meta Pixel/Dataset ID used as the outbound Conversions API endpoint (graph.facebook.com/{version}/{Dataset_ID__c}/events) by MetaConversionSyncQueueable when reporting Lead status changes back to Meta. Found in Events Manager for the CRM dataset connected to Lead Ads.</description>
+    <externalId>false</externalId>
+    <label>Dataset ID</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

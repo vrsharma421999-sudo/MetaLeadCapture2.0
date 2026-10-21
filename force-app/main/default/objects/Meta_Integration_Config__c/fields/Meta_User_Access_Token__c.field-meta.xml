@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_User_Access_Token__c</fullName>
+    <description>Long-lived User access token obtained by the &quot;Connect to Meta&quot; embedded Facebook Login flow (MetaOAuthConnectService). Used ONLY by that flow&apos;s own Page/Form auto-discovery — separate from and never read by the Named Credential-based lead-capture pipeline (MetaLeadFetchQueueable, MetaConversionSyncQueueable, MetaPageSyncService, MetaFormSyncService), which keeps using its own System User token. Never exposed to the client — Apex-only.</description>
+    <label>Meta User Access Token</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>TextArea</type>
+</CustomField>

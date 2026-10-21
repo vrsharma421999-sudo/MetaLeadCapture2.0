@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Setting_Key__c</fullName>
+    <description>Singleton lookup key. Always &apos;Default&apos; — there is exactly one active settings row per org. Kept as an explicit field so the Apex query stays a stable WHERE clause.</description>
+    <externalId>false</externalId>
+    <label>Setting Key</label>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

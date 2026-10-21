@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>List</customSettingsType>
+    <description>Who gets alerted on a Meta lead sync failure, and how (Bell/Email/Both). A Custom Setting so it is always readable by Apex — including the Guest User running the inbound webhook, whose trigger-fired MetaLeadSyncFailureNotifier needs to read this list — regardless of sharing/FLS. User_Name__c/User_Email__c are captured flat at save time (Custom Settings can&apos;t hold a Lookup relationship) rather than read live off the User object.</description>
+    <enableFeeds>false</enableFeeds>
+    <label>Meta Notify Recipient</label>
+    <visibility>Public</visibility>
+</CustomObject>

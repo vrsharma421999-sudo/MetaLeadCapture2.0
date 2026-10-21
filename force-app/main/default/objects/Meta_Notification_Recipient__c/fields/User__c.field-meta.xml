@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>User__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The Salesforce user who should be alerted when a Meta lead sync fails. Salesforce only allows SetNull (not Cascade/Restrict) on a lookup to User, which is incompatible with a required field, so this is optional at the schema level — MetaLeadCaptureSetupController enforces that a user is selected before saving.</description>
+    <label>User</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Meta Notification Recipients</relationshipLabel>
+    <relationshipName>Meta_Notification_Recipients</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

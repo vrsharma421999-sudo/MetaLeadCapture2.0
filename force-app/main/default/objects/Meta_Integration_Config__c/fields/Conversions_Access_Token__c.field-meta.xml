@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Conversions_Access_Token__c</fullName>
+    <description>Legacy/manual fallback only — outbound Conversions API auth now goes through the Meta_Graph_API Named Credential / External Credential. Kept for reference; not read by Apex.</description>
+    <label>Conversions Access Token (legacy)</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>TextArea</type>
+</CustomField>

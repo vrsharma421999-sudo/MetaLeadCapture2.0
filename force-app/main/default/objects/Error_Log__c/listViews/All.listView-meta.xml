@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All</fullName>
+    <columns>NAME</columns>
+    <columns>Class__c</columns>
+    <columns>Current_User__c</columns>
+    <columns>Facebook_error__c</columns>
+    <columns>Description__c</columns>
+    <columns>Facebook_Campaign__c</columns>
+    <columns>Facebook_Page__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Datetime__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Object__c</field>
+        <operation>equals</operation>
+        <value>Zapier</value>
+    </filters>
+    <label>All</label>
+</ListView>

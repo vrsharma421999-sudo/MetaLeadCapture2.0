@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Page_Id__c</fullName>
+    <description>Meta Page ID (the &quot;id&quot; on each webhook entry, and the &quot;page_id&quot; on the leadgen payload). Must exactly match what Meta sends.</description>
+    <externalId>false</externalId>
+    <label>Page Id</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

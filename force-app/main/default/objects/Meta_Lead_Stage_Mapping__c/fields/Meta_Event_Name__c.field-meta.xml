@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_Event_Name__c</fullName>
+    <description>event_name value sent to Meta&apos;s Conversions API for this Lead Status. Must match a stage name recognized by the CRM dataset configured in Meta Events Manager for this ad account.</description>
+    <externalId>false</externalId>
+    <label>Meta Event Name</label>
+    <length>100</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

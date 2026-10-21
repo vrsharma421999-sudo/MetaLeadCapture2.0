@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Resolved_Lead__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The Lead created/updated by a successful resend.</description>
+    <label>Resolved Lead</label>
+    <referenceTo>Lead</referenceTo>
+    <relationshipLabel>Resolved Meta Lead Sync Failures</relationshipLabel>
+    <relationshipName>Resolved_Meta_Lead_Sync_Failures</relationshipName>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

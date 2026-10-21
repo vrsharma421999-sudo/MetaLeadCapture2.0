@@ -1,36 +1,140 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- Apex Classes -->
     <types>
-        <members>*</members>
+        <members>ChangePasswordController</members>
+        <members>ChangePasswordControllerTest</members>
+        <members>CreateErrorLog</members>
+        <members>CreateErrorLogTest</members>
+        <members>ForgotPasswordController</members>
+        <members>ForgotPasswordControllerTest</members>
+        <members>LeadConversionSyncHandler</members>
+        <members>LeadConversionSyncHandlerTest</members>
+        <members>MetaConnectFacebookController</members>
+        <members>MetaConnectFacebookControllerTest</members>
+        <members>MetaConversionSyncQueueable</members>
+        <members>MetaConversionSyncQueueableTest</members>
+        <members>MetaConversionSyncScheduler</members>
+        <members>MetaConversionSyncSchedulerTest</members>
+        <members>MetaFormSyncService</members>
+        <members>MetaFormSyncServiceTest</members>
+        <members>MetaLeadCaptureSetupController</members>
+        <members>MetaLeadCaptureSetupControllerTest</members>
+        <members>MetaLeadFetchQueueable</members>
+        <members>MetaLeadFetchQueueableTest</members>
+        <members>MetaLeadMapper</members>
+        <members>MetaLeadMapperTest</members>
+        <members>MetaLeadSyncFailureNotifier</members>
+        <members>MetaLeadSyncFailureNotifierTest</members>
+        <members>MetaLeadSyncFailureResend</members>
+        <members>MetaLeadSyncFailureResendTest</members>
+        <members>MetaLeadWebhook</members>
+        <members>MetaLeadWebhookTest</members>
+        <members>MetaLeadgenEvent</members>
+        <members>MetaOAuthConnectService</members>
+        <members>MetaOAuthConnectServiceTest</members>
+        <members>MetaPageSyncQueueable</members>
+        <members>MetaPageSyncQueueableTest</members>
+        <members>MetaPageSyncScheduler</members>
+        <members>MetaPageSyncService</members>
+        <members>MetaPageSyncServiceTest</members>
+        <members>MyProfilePageController</members>
+        <members>MyProfilePageControllerTest</members>
+        <members>SiteLoginController</members>
+        <members>SiteLoginControllerTest</members>
+        <members>SiteRegisterController</members>
+        <members>SiteRegisterControllerTest</members>
         <name>ApexClass</name>
     </types>
+
+    <!-- Visualforce Pages -->
     <types>
-        <members>*</members>
-        <name>ApexComponent</name>
-    </types>
-    <types>
-        <members>*</members>
+        <members>MetaConnectFacebook</members>
         <name>ApexPage</name>
     </types>
+
+    <!-- Apex Triggers -->
     <types>
-        <members>*</members>
-        <name>ApexTestSuite</name>
-    </types>
-    <types>
-        <members>*</members>
+        <members>LeadTrigger</members>
+        <members>MetaLeadSyncFailureTrigger</members>
         <name>ApexTrigger</name>
     </types>
+
+    <!-- Lightning Web Components -->
     <types>
-        <members>*</members>
-        <name>AuraDefinitionBundle</name>
-    </types>
-    <types>
-        <members>*</members>
+        <members>metaLeadCaptureSetup</members>
         <name>LightningComponentBundle</name>
     </types>
+
+    <!-- Custom Objects -->
     <types>
-        <members>*</members>
-        <name>StaticResource</name>
+        <members>Error_Log__c</members>
+        <members>Meta_Ad_Account__c</members>
+        <members>Meta_Conversion_Event__c</members>
+        <members>Meta_Field_Map__c</members>
+        <members>Meta_Integration_Config__c</members>
+        <members>Meta_Lead_Stage_Mapping__c</members>
+        <members>Meta_Lead_Sync_Failure__c</members>
+        <members>Meta_Notification_Recipient__c</members>
+        <members>Meta_Notify_Recipient__c</members>
+        <members>Meta_Page_Setting__c</members>
+        <name>CustomObject</name>
     </types>
+
+    <!-- Custom Fields on Standard Objects -->
+    <types>
+        <members>Lead.Meta_Ad_Id__c</members>
+        <members>Lead.Meta_Ad_Set_Id__c</members>
+        <members>Lead.Meta_Campaign_Id__c</members>
+        <members>Lead.Meta_Form_Id__c</members>
+        <members>Lead.Meta_Lead_Created_Time__c</members>
+        <members>Lead.Meta_Lead_Source_Detail__c</members>
+        <members>Lead.Meta_Leadgen_Id__c</members>
+        <members>Lead.Meta_Page_Id__c</members>
+        <members>Lead.Meta_Raw_Field_Data__c</members>
+        <name>CustomField</name>
+    </types>
+
+    <!-- Custom Tabs -->
+    <types>
+        <members>Meta_Lead_Capture_Setup</members>
+        <name>CustomTab</name>
+    </types>
+
+    <!-- FlexiPages (Lightning Pages) -->
+    <types>
+        <members>Meta_Lead_Capture_Setup</members>
+        <name>FlexiPage</name>
+    </types>
+
+    <!-- Custom Notification Types -->
+    <types>
+        <members>Meta_Lead_Sync_Failure_Alert</members>
+        <name>CustomNotificationType</name>
+    </types>
+
+    <!-- Permission Sets -->
+    <types>
+        <members>Meta_Lead_Integration_Admin</members>
+        <members>Meta_Lead_Integration_Access</members>
+        <name>PermissionSet</name>
+    </types>
+
+    <!-- Remote Site Settings -->
+    <types>
+        <members>Meta_Graph_API</members>
+        <name>RemoteSiteSetting</name>
+    </types>
+
+    <!-- External & Named Credentials -->
+    <types>
+        <members>Meta_Graph_API_Cred</members>
+        <name>ExternalCredential</name>
+    </types>
+    <types>
+        <members>Meta_Graph_API</members>
+        <name>NamedCredential</name>
+    </types>
+
     <version>67.0</version>
 </Package>

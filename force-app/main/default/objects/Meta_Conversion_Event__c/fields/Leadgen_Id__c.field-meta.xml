@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Leadgen_Id__c</fullName>
+    <description>Meta leadgen_id, sent as user_data.lead_id on the outbound event (Meta&apos;s highest-priority match key). Copied from the Lead at creation time so this row still means something if the Lead is later deleted.</description>
+    <externalId>false</externalId>
+    <label>Leadgen Id</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

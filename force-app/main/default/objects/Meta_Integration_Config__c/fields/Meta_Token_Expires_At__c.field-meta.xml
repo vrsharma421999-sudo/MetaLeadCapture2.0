@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_Token_Expires_At__c</fullName>
+    <description>Expiry of Meta_User_Access_Token__c (long-lived Facebook tokens last ~60 days). Display-only — lets the Setup page warn an admin to reconnect before it lapses.</description>
+    <label>Meta Token Expires At</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

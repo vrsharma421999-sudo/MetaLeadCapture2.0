@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_App_Login_Config_Id__c</fullName>
+    <description>The Facebook Login for Business Configuration Id (from the Meta App&apos;s &quot;Facebook Login for Business&quot; feature) used to drive the embedded &quot;Connect to Meta&quot; wizard&apos;s Page/Form picker. Not a secret.</description>
+    <externalId>false</externalId>
+    <label>Meta Login Config Id</label>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

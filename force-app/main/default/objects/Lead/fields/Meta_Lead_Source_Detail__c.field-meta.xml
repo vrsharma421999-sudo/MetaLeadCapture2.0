@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_Lead_Source_Detail__c</fullName>
+    <description>Unrestricted free-text record of the Meta source (e.g. platform). LeadSource is a restricted picklist and &apos;Facebook&apos; is only written there when it is an active value in this org — this field always captures the detail regardless, so nothing is silently dropped. See MetaLeadFetchQueueable.setLeadSource().</description>
+    <externalId>false</externalId>
+    <label>Meta Lead Source Detail</label>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

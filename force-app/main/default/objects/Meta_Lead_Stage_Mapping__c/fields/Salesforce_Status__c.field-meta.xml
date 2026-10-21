@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Salesforce_Status__c</fullName>
+    <description>Must exactly match a Lead.Status picklist value (case-sensitive). When a Meta-sourced Lead&apos;s Status changes to this value, an event is queued for Meta.</description>
+    <externalId>false</externalId>
+    <label>Salesforce Status</label>
+    <length>100</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

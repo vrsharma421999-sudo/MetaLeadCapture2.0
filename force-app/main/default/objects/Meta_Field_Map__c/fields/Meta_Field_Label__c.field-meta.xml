@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_Field_Label__c</fullName>
+    <description>Display-only human-readable question label as shown on the Meta form (e.g. &quot;What&apos;s your phone number?&quot;), populated automatically by the Discover Forms &amp; Questions sync — not used in mapping logic.</description>
+    <externalId>false</externalId>
+    <label>Meta Field Label</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

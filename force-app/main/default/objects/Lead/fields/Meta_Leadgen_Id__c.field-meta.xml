@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Meta_Leadgen_Id__c</fullName>
+    <caseSensitive>false</caseSensitive>
+    <description>Meta&apos;s leadgen_id for the form submission that created this Lead. Idempotency key for MetaLeadWebhook/MetaLeadFetchQueueable — Meta may redeliver the same webhook, so this must stay unique.</description>
+    <externalId>true</externalId>
+    <label>Meta Leadgen Id</label>
+    <length>255</length>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>
