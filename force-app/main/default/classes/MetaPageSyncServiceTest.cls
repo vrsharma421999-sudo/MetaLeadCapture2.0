@@ -47,9 +47,10 @@ private class MetaPageSyncServiceTest {
         System.assertEquals(1, result.pagesAdded, 'Only NEWPAGE1 is new and subscribes successfully');
         System.assertEquals(1, result.pagesSubscribeFailed, 'FAILPAGE fails to subscribe');
 
-        List<Meta_Page_Setting__c> newRow = [SELECT Page_Id__c, Page_Name__c, Active__c FROM Meta_Page_Setting__c WHERE Page_Id__c = 'NEWPAGE1'];
+        List<Meta_Page_Setting__c> newRow = [SELECT Page_Id__c, Page_Name__c, Page_Access_Token__c, Active__c FROM Meta_Page_Setting__c WHERE Page_Id__c = 'NEWPAGE1'];
         System.assertEquals(1, newRow.size());
         System.assertEquals('New Page One', newRow[0].Page_Name__c);
+        System.assertEquals('page-token-xyz', newRow[0].Page_Access_Token__c, 'Page Access Token must be stored automatically');
         System.assertEquals(true, newRow[0].Active__c);
 
         System.assertEquals(0, [SELECT count() FROM Meta_Page_Setting__c WHERE Page_Id__c = 'FAILPAGE'],

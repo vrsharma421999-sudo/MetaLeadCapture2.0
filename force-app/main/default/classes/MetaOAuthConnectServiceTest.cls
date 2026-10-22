@@ -64,7 +64,8 @@ private class MetaOAuthConnectServiceTest {
         System.assertEquals('long-lived-token', saved.Meta_User_Access_Token__c);
         System.assertNotEquals(null, saved.Meta_Token_Expires_At__c);
 
-        System.assertEquals(1, [SELECT count() FROM Meta_Page_Setting__c WHERE Page_Id__c = 'PAGE1']);
+        Meta_Page_Setting__c pageSetting = [SELECT Page_Id__c, Page_Access_Token__c FROM Meta_Page_Setting__c WHERE Page_Id__c = 'PAGE1' LIMIT 1];
+        System.assertEquals('page-token-1', pageSetting.Page_Access_Token__c, 'Page Access Token must be stored automatically');
         System.assertEquals(1, [
             SELECT count() FROM Meta_Field_Map__c WHERE Form_Id__c = 'FORM1' AND Meta_Field_Key__c = 'email'
         ]);

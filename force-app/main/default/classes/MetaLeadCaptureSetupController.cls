@@ -65,7 +65,7 @@ public with sharing class MetaLeadCaptureSetupController {
     @AuraEnabled(cacheable=true)
     public static List<Meta_Page_Setting__c> getPageConfigs() {
         return [
-            SELECT Id, Page_Id__c, Page_Name__c, Active__c
+            SELECT Id, Page_Id__c, Page_Name__c, Page_Access_Token__c, Active__c
             FROM Meta_Page_Setting__c
             ORDER BY Page_Name__c NULLS LAST, Page_Id__c
         ];

@@ -91,21 +91,21 @@ public without sharing class MetaOAuthConnectService {
     private static void runDiscovery(String token, String graphApiVersion, ConnectResult result) {
         String version = String.isNotBlank(graphApiVersion) ? graphApiVersion : DEFAULT_VERSION;
         try {
-            Set<String> existingPageIds = new Set<String>();
+            Map<String, Meta_Page_Setting__c> existingPagesByPageId = new Map<String, Meta_Page_Setting__c>();
             for (Meta_Page_Setting__c p : Meta_Page_Setting__c.getAll().values()) {
                 if (String.isNotBlank(p.Page_Id__c)) {
-                    existingPageIds.add(p.Page_Id__c);
+                    existingPagesByPageId.put(p.Page_Id__c, p);
                 }
             }
 
             List<Object> pages = listPages(token, version);
             result.pagesFound = pages.size();
 
-            // Callout phase: collect new Pages (subscribing each) and every active Page's forms
+            // Callout phase: collect new/updated Pages (subscribing each) and every active Page's forms
             // + questions, all in memory — no DML until every callout below is done.
-            List<Meta_Page_Setting__c> pagesToInsert = new List<Meta_Page_Setting__c>();
+            List<Meta_Page_Setting__c> pagesToUpsert = new List<Meta_Page_Setting__c>();
             List<String> pageIdsToScanForForms = new List<String>();
-            for (Meta_Page_Setting__c p : Meta_Page_Setting__c.getAll().values()) {
+            for (Meta_Page_Setting__c p : existingPagesByPageId.values()) {
                 if (p.Active__c && String.isNotBlank(p.Page_Id__c)) {
                     pageIdsToScanForForms.add(p.Page_Id__c);
                 }
@@ -115,13 +115,29 @@ public without sharing class MetaOAuthConnectService {
                 String pageId = page.get('id') != null ? String.valueOf(page.get('id')) : null;
                 String pageName = (String) page.get('name');
                 String pageToken = (String) page.get('access_token');
-                if (String.isBlank(pageId) || existingPageIds.contains(pageId)) {
+                if (String.isBlank(pageId)) {
+                    continue;
+                }
+                Meta_Page_Setting__c existingSetting = existingPagesByPageId.get(pageId);
+                if (existingSetting != null) {
+                    // Automatically backfill or refresh Page Access Token on existing page configs
+                    if (String.isNotBlank(pageToken) && existingSetting.Page_Access_Token__c != pageToken) {
+                        existingSetting.Page_Access_Token__c = pageToken;
+                        pagesToUpsert.add(existingSetting);
+                    }
                     continue;
                 }
                 if (String.isNotBlank(pageToken)) {
                     subscribePage(pageId, pageToken, version);
                 }
-                pagesToInsert.add(new Meta_Page_Setting__c(Name = pageId, Page_Id__c = pageId, Page_Name__c = pageName, Active__c = true));
+                // Automatically persist the permanent Page Access Token returned by Meta
+                pagesToUpsert.add(new Meta_Page_Setting__c(
+                    Name = pageId,
+                    Page_Id__c = pageId,
+                    Page_Name__c = pageName,
+                    Page_Access_Token__c = pageToken,
+                    Active__c = true
+                ));
                 pageIdsToScanForForms.add(pageId);
                 result.pagesAdded++;
             }
@@ -170,8 +186,8 @@ public without sharing class MetaOAuthConnectService {
             }
 
             // DML phase: every callout above is done — safe to write now.
-            if (!pagesToInsert.isEmpty()) {
-                Database.insert(pagesToInsert, AccessLevel.SYSTEM_MODE);
+            if (!pagesToUpsert.isEmpty()) {
+                Database.upsert(pagesToUpsert, AccessLevel.SYSTEM_MODE);
             }
             if (!mappingsToInsert.isEmpty()) {
                 Database.insert(mappingsToInsert, AccessLevel.SYSTEM_MODE);

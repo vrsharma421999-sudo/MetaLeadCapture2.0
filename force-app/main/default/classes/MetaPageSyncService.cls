@@ -23,26 +23,46 @@ public without sharing class MetaPageSyncService {
         List<Object> pages = listAccessiblePages();
         result.pagesFound = pages.size();
 
-        Set<String> existingPageIds = new Set<String>();
+        Map<String, Meta_Page_Setting__c> existingPagesByPageId = new Map<String, Meta_Page_Setting__c>();
         for (Meta_Page_Setting__c p : Meta_Page_Setting__c.getAll().values()) {
             if (String.isNotBlank(p.Page_Id__c)) {
-                existingPageIds.add(p.Page_Id__c);
+                existingPagesByPageId.put(p.Page_Id__c, p);
             }
         }
 
-        List<Meta_Page_Setting__c> toInsert = new List<Meta_Page_Setting__c>();
+        List<Meta_Page_Setting__c> toUpsert = new List<Meta_Page_Setting__c>();
         for (Object pageObj : pages) {
             Map<String, Object> page = (Map<String, Object>) pageObj;
             String pageId = page.get('id') != null ? String.valueOf(page.get('id')) : null;
             String pageName = (String) page.get('name');
-            if (String.isBlank(pageId) || existingPageIds.contains(pageId)) {
+            String pageToken = (String) page.get('access_token');
+            if (String.isBlank(pageId)) {
+                continue;
+            }
+            if (String.isBlank(pageToken)) {
+                pageToken = getPageAccessToken(pageId);
+            }
+
+            Meta_Page_Setting__c existingSetting = existingPagesByPageId.get(pageId);
+            if (existingSetting != null) {
+                // Automatically populate or update Page Access Token if it was previously blank or changed
+                if (String.isNotBlank(pageToken) && existingSetting.Page_Access_Token__c != pageToken) {
+                    existingSetting.Page_Access_Token__c = pageToken;
+                    toUpsert.add(existingSetting);
+                    result.messages.add('Updated Page Access Token for: ' + pageName + ' (' + pageId + ')');
+                }
                 continue;
             }
 
-            Boolean subscribed = subscribePage(pageId);
+            Boolean subscribed = subscribePage(pageId, pageToken);
             if (subscribed) {
-                toInsert.add(new Meta_Page_Setting__c(
-                    Name = pageId, Page_Id__c = pageId, Page_Name__c = pageName, Active__c = true
+                // Automatically persist the permanent Page Access Token returned by Meta
+                toUpsert.add(new Meta_Page_Setting__c(
+                    Name = pageId,
+                    Page_Id__c = pageId,
+                    Page_Name__c = pageName,
+                    Page_Access_Token__c = pageToken,
+                    Active__c = true
                 ));
                 result.pagesAdded++;
                 result.messages.add('Added and subscribed: ' + pageName + ' (' + pageId + ')');
@@ -51,8 +71,8 @@ public without sharing class MetaPageSyncService {
                 result.messages.add('FAILED to subscribe: ' + pageName + ' (' + pageId + ') — check Error_Log__c');
             }
         }
-        if (!toInsert.isEmpty()) {
-            Database.insert(toInsert, AccessLevel.SYSTEM_MODE);
+        if (!toUpsert.isEmpty()) {
+            Database.upsert(toUpsert, AccessLevel.SYSTEM_MODE);
         }
         return result;
     }
@@ -63,7 +83,8 @@ public without sharing class MetaPageSyncService {
      */
     private static List<Object> listAccessiblePages() {
         HttpRequest req = new HttpRequest();
-        req.setEndpoint('callout:Meta_Graph_API/me/accounts?fields=id,name&limit=200');
+        // Request access_token directly so Meta returns each Page's permanent token
+        req.setEndpoint('callout:Meta_Graph_API/me/accounts?fields=id,name,access_token&limit=200');
         req.setMethod('GET');
 
         HttpResponse res = new Http().send(req);
@@ -81,11 +102,12 @@ public without sharing class MetaPageSyncService {
 
     /**
      * @description Subscribing a Page to the leadgen field requires that specific Page's own
-     *              access token (not the System User token directly) per Meta's API contract
-     *              — so this exchanges for it first via GET /{page-id}?fields=access_token.
+     *              access token (not the System User token directly) per Meta's API contract.
      */
-    private static Boolean subscribePage(String pageId) {
-        String pageToken = getPageAccessToken(pageId);
+    private static Boolean subscribePage(String pageId, String pageToken) {
+        if (String.isBlank(pageToken)) {
+            pageToken = getPageAccessToken(pageId);
+        }
         if (String.isBlank(pageToken)) {
             return false;
         }
@@ -104,6 +126,10 @@ public without sharing class MetaPageSyncService {
             return false;
         }
         return true;
+    }
+
+    private static Boolean subscribePage(String pageId) {
+        return subscribePage(pageId, null);
     }
 
     private static String getPageAccessToken(String pageId) {
