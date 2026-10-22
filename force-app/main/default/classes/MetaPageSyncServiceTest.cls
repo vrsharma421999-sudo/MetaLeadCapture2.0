@@ -77,6 +77,49 @@ private class MetaPageSyncServiceTest {
         System.assertEquals(0, result.pagesSubscribeFailed);
     }
 
+    private class PageTokenFallbackMock implements HttpCalloutMock {
+        public HttpResponse respond(HttpRequest req) {
+            String endpoint = req.getEndpoint();
+            HttpResponse res = new HttpResponse();
+            res.setHeader('Content-Type', 'application/json');
+
+            if (endpoint.contains('/me/accounts')) {
+                res.setStatusCode(400);
+                res.setBody('{"error":{"message":"(#100) Tried accessing nonexisting field (accounts) on node type (Page)","type":"OAuthException","code":100}}');
+            } else if (endpoint.contains('/me?fields=id,name')) {
+                res.setStatusCode(200);
+                res.setBody('{"id":"SINGLEPAGE123","name":"Lead Capture page"}');
+            } else if (endpoint.contains('fields=access_token')) {
+                res.setStatusCode(200);
+                res.setBody('{"access_token":"page-token-abc"}');
+            } else if (endpoint.contains('/subscribed_apps')) {
+                res.setStatusCode(200);
+                res.setBody('{"success":true}');
+            } else {
+                res.setStatusCode(404);
+                res.setBody('{"error":"not found"}');
+            }
+            return res;
+        }
+    }
+
+    @IsTest
+    static void testSyncPages_PageTokenUsed_ResolvesSinglePage() {
+        Test.setMock(HttpCalloutMock.class, new PageTokenFallbackMock());
+
+        Test.startTest();
+            MetaPageSyncService.SyncResult result = MetaPageSyncService.syncPages();
+        Test.stopTest();
+
+        System.assertEquals(1, result.pagesFound, 'Fallback should discover the page directly');
+        System.assertEquals(1, result.pagesAdded, 'Page should be added and subscribed');
+
+        List<Meta_Page_Setting__c> pages = [SELECT Page_Id__c, Page_Name__c, Page_Access_Token__c, Active__c FROM Meta_Page_Setting__c WHERE Page_Id__c = 'SINGLEPAGE123'];
+        System.assertEquals(1, pages.size());
+        System.assertEquals('Lead Capture page', pages[0].Page_Name__c);
+        System.assertEquals('page-token-abc', pages[0].Page_Access_Token__c);
+    }
+
     private class ErrorMock implements HttpCalloutMock {
         public HttpResponse respond(HttpRequest req) {
             HttpResponse res = new HttpResponse();

@@ -88,16 +88,36 @@ public without sharing class MetaPageSyncService {
         req.setMethod('GET');
 
         HttpResponse res = new Http().send(req);
-        if (res.getStatusCode() != 200) {
-            CreateErrorLog.logFacebookError(
-                'listAccessiblePages', 'MetaPageSyncService', 'Page list', new MetaPageSyncException(res.getBody()),
-                null, null, null, 'Graph API /me/accounts returned ' + res.getStatusCode()
-            );
-            return new List<Object>();
+        if (res.getStatusCode() == 200) {
+            Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            List<Object> data = (List<Object>) body.get('data');
+            return data != null ? data : new List<Object>();
         }
-        Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-        List<Object> data = (List<Object>) body.get('data');
-        return data != null ? data : new List<Object>();
+
+        // If the configured token is a Page Access Token (rather than a User/System User token),
+        // /me resolves to the Page itself, so /me/accounts returns "nonexisting field (accounts)".
+        // Fall back to /me to discover this single Page directly!
+        if (res.getStatusCode() == 400 && res.getBody() != null && res.getBody().contains('nonexisting field (accounts)')) {
+            HttpRequest pageReq = new HttpRequest();
+            pageReq.setEndpoint('callout:Meta_Graph_API/me?fields=id,name');
+            pageReq.setMethod('GET');
+            HttpResponse pageRes = new Http().send(pageReq);
+            if (pageRes.getStatusCode() == 200) {
+                Map<String, Object> pageData = (Map<String, Object>) JSON.deserializeUntyped(pageRes.getBody());
+                String pId = (String) pageData.get('id');
+                String pToken = getPageAccessToken(pId);
+                if (String.isNotBlank(pToken)) {
+                    pageData.put('access_token', pToken);
+                }
+                return new List<Object>{ pageData };
+            }
+        }
+
+        CreateErrorLog.logFacebookError(
+            'listAccessiblePages', 'MetaPageSyncService', 'Page list', new MetaPageSyncException(res.getBody()),
+            null, null, null, 'Graph API /me/accounts returned ' + res.getStatusCode()
+        );
+        return new List<Object>();
     }
 
     /**
